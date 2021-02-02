@@ -123,21 +123,31 @@ router.get("/profile/:id", (req, res) => {
 // Edit Profile or Update Profile
 router.post("/profile/:id", async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
     const { firstName, lastName } = req.body;
-    Profile.findByIdAndUpdate(id, {
-      firstName: firstName,
-      lastName: lastName,
-    }).then((success) => {
-      if (!success)
-        res.json({ msg: "Error updating your profile please try again " });
-      res.json({ msg: "Profile updated successfully", success });
-      next();
-    });
+    await Profile.findByIdAndUpdate(id, { firstName, lastName }).then(
+      (profile) => {
+        !profile
+          ? "Error updating your profile"
+          : res.status(200).json({ msg: "Profile successfully updated" });
+      }
+    );
   } catch (error) {
     next(error);
   }
 });
 
 // Delete Profile
+router.delete("/profile/:id", async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    await Profile.findByIdAndDelete(id).then((profile) => {
+      !profile
+        ? "Error deleting your profile"
+        : res.status(200).json({ msg: "Profile successfully deleted" });
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 module.exports = router;
