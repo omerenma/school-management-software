@@ -4,16 +4,169 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const secret = require("../config/key").secret;
 const User = require("../models/User");
+const { body, check, validationResult } = require("express-validator");
+const { checkSchema } = require("express-validator");
+const auth = require("../middlewares/authentication");
+const validator = require("validator");
 
-// router.get("/:role", (req, res) => {
-//   User.findOne({ role: req.params.role }).then((user) => {
-//     if (user.role == "admin") {
-//       res.json(user);
-//     } else {
-//       res.status(403).json({ msg: "Unauthorized" });
+// REGISTER ROUT
+router.post(
+  "/signup",
+  [
+    check("name", "Name too short").isLength({ min: 7 }),
+    check("name", "Name cannot be empty").notEmpty(),
+    check("email", "Must be a valid  email").isEmail(),
+    check("email", "Email cannot be empty").notEmpty(),
+    check("role", "Role cannot be empty").notEmpty(),
+    check("password", "Password must be at least 7 character long").isLength({
+      min: 7,
+    }),
+    check("password", "Password cannot be empty").notEmpty(),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (errors.isEmpty()) {
+      const { name, email, role, password } = req.body;
+      User.findOne({ email }).then((user) => {
+        if (user) {
+          res.status(400).json({ msg: "Email already exist" });
+        } else {
+          const newUser = new User({
+            name,
+            email,
+            role: role || "admin",
+            password,
+          });
+          bcrypt.genSalt(10, (err, salt) => {
+            if (err) throw err;
+            bcrypt.hash(newUser.password, salt, (err, hash) => {
+              if (err) throw err;
+              newUser.password = hash;
+              const accessToken = jwt.sign({ userId: newUser._id }, secret, {
+                expiresIn: "1d",
+              });
+              newUser.accessToken = accessToken;
+              newUser.save();
+              res.json({
+                data: newUser,
+                accessToken,
+              });
+            });
+          });
+        }
+      });
+      // .catch((err) => {
+      //   res.json({ msg: err });
+      // });
+    } else if (!errors.isEmpty()) {
+      return res.status(400).json(
+        errors.array().map((err) => {
+          return err.msg;
+        })
+      );
+    }
+  }
+);
+
+// LOGIN ROUTE
+// router.post(
+//   "/login",
+//   [
+//     check("email", "Must be a valid  email").isEmail(),
+//     check("email", "Email cannot be empty").notEmpty(),
+//     check("password", "Password must be at least 7 character long").isLength({
+//       min: 7,
+//     }),
+//     check("password", "Password cannot be empty").notEmpty(),
+//   ],
+//   (req, res) => {
+//     const errors = validationResult(req);
+//     if (errors.isEmpty()) {
+//       const { email, password } = req.body;
+//       User.findOne({ email }).then((user) => {
+//         if (!user) {
+//           res.status(400).json({ msg: "Email does not exist" });
+//         } else {
+//           bcrypt.compare(password, user.password).then((isMatch) => {
+//             if (isMatch) {
+//               const payload = {
+//                 id: user._id,
+//                 // name: user.name,
+//                 // email: user.email,
+//                 // role: user.role,
+//               };
+//               jwt.sign(
+//                 payload,
+//                 secret,
+//                 { expiresIn: "1 day" },
+//                 (err, token) => {
+//                   if (err) throw err;
+//                   res.status(200).json({
+//                     success: true,
+//                     token: `Bearer ${token}`,
+//                   });
+//                 }
+//               );
+//             } else {
+//               res.status(400).json({ msg: "Incorrect password" });
+//             }
+//           });
+//         }
+//       });
+//     } else if (!errors.isEmpty()) {
+//       return res.status(400).json(
+//         errors.array().map((err) => {
+//           return err.msg;
+//         })
+//       );
 //     }
-//   });
-// });
+//     {
+//     }
+//   }
+// );
+
+router.post("/login", async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    await User.findOne({ email }).then((user) => {
+      if (!user) res.status(400).json({ msg: "Email not found" });
+      bcrypt.compare(password, user.password).then((isMatch) => {
+        if (!isMatch) res.status(400).json({ msg: "Incorrect password" });
+        const accessToken = jwt.sign({ userId: user._id }, secret, {
+          expiresIn: "1d",
+        });
+        User.findByIdAndUpdate(user._id, { accessToken });
+        res
+          .status(200)
+          .json({ email: user.email, role: user.role, accessToken });
+      });
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Get all Profiles
+router.get("/profile", auth, (req, res) => {
+  const { role } = req.user;
+  console.log(role, "admin");
+  if (role !== "admin") {
+    res.status(401).json({ msg: "Access denied" });
+  }
+  User.find({}).then((user) => {
+    res.json(user);
+  });
+});
+router.get("/profile/:id", auth, (req, res) => {
+  const { id } = req.params.id;
+  User.findById(id).then((user) => {
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(403).json({ msg: "Unauthorized" });
+    }
+  });
+});
 router.get("/dashboard/:role", (req, res) => {
   User.findOne({ role: req.params.role }).then((user) => {
     if (user.role == "admin") {
@@ -28,166 +181,4 @@ router.get("/dashboard/:role", (req, res) => {
     }
   });
 });
-router.post("/signup", (req, res) => {
-  const { name, email, role, password } = req.body;
-  User.findOne({ email })
-    .then((user) => {
-      if (user) {
-        res.status(400).json({ msg: "Email already exist" });
-      } else {
-        const newUser = new User({
-          name,
-          email,
-          role,
-          password,
-        });
-        bcrypt.genSalt(10, (err, salt) => {
-          if (err) throw err;
-          bcrypt.hash(newUser.password, salt, (err, hash) => {
-            if (err) throw err;
-            newUser.password = hash;
-            jwt.sign({ role: newUser.role }, secret, (err, token) => {
-              if (err) throw err;
-              newUser.save((err, user) => {
-                if (err) throw err;
-                res.json({
-                  msg: "Success!",
-                  token: `Bearer ${token}`,
-                  user,
-                });
-              });
-            });
-          });
-        });
-      }
-    })
-    .catch((err) => {
-      res.json({ msg: err });
-    });
-});
-
-router.post("/login", (req, res) => {
-  const { email, password } = req.body;
-  User.findOne({ email }).then((user) => {
-    if (!user) {
-      res.status(400).json({ msg: "Email does not exist" });
-    } else {
-      bcrypt.compare(password, user.password).then((isMatch) => {
-        if (isMatch) {
-          const payload = {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-          };
-          jwt.sign(payload, secret, { expiresIn: "60s" }, (err, token) => {
-            if (err) throw err;
-            res.status(200).json({
-              success: true,
-              token: `Bearer ${token}`,
-            });
-          });
-        } else {
-          res.status(400).json({ msg: "Incorrect password" });
-        }
-      });
-    }
-  });
-});
 module.exports = router;
-
-// const express = require("express");
-// const router = express.Router();
-// const bycrypt = require("bcryptjs");
-// const User = require("../models/User");
-// const {
-//   register,
-//   login,
-//   userAuth,
-//   checkRole,
-//   serializeUser,
-// } = require("../utils/Auth");
-
-// router.get("/landing-page", (req, res) => {
-//   res.json({ message: "Welcome to Landing Page" });
-// });
-
-// router.get("/", userAuth, checkRole, (req, res) => {
-//   User.findOne({ role });
-//   if (role) {
-//     console.log(role, "user role");
-//   } else {
-//     console.log("No role");
-//   }
-// });
-
-// // Users Registration Route
-// // router.post("/register-user", async (req, res) => {
-// //   await register(req.body, "user", res);
-// // });
-// // // Admin Registration Route
-// // router.post("/register-admin", async (req, res) => {
-// //   await register(req.body, "admin", res);
-// // });
-// // Super Admin Registration Route
-// router.post("/register-super-admin", async (req, res) => {
-//   await register(req.body, "super-admin", res);
-// });
-
-// // Users Login Route
-// router.post("/login-user", async (req, res) => {
-//   await login(req.body, "user", res).then((status) =>
-//     res.redirect(status, "/")
-//   );
-// });
-// //Admin Login Route
-// router.post("/login-admin", async (req, res) => {
-//   await login(req.body, "admin", res);
-// });
-// // // Super Admin Login Route
-// router.post("/login-super-admin", async (req, res) => {
-//   await login(req.body, "super-admin", res);
-// });
-
-// // Protected Routes
-// router.get(
-//   "/user-protected",
-//   userAuth,
-//   checkRole(["user"]),
-//   async (req, res) => {
-//     res.json({ message: "Hello User" });
-//   }
-// );
-// router.get(
-//   "/admin-protected",
-//   userAuth,
-//   checkRole(["admin"]),
-//   async (req, res) => {
-//     res.json({ message: "Hello Admin" });
-//   }
-// );
-// router.get(
-//   "/super-admin-protected",
-//   userAuth,
-//   checkRole(["super-admin"]),
-//   async (req, res) => {
-//     res.json({ message: "Hello Super Admin" });
-//   }
-// );
-// // router.get(
-// //   "/super-admin-and-admin-protected",
-// //   userAuth,
-// //   checkRole(["superadmin", "admin"]),
-// //   async (req, res) => {}
-// // );
-
-// // Profile Route
-// router.get("/profile", (req, res) => {});
-// // Users Protected Route
-// router.post("/profile-user", async (req, res) => {});
-// // Admin Protected Route
-// router.post("/profile-admin", async (req, res) => {});
-// // Super Admin Protected Route
-// router.post("/profile-super-admin", async (req, res) => {});
-
-// module.exports = router;

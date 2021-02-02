@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 const Schema = mongoose.Schema;
 const UserSchema = new Schema({
   name: {
@@ -11,12 +12,15 @@ const UserSchema = new Schema({
   },
   role: {
     type: String,
-    //default: "user",
+    default: "admin",
     priviledges: ["admin", "user"],
   },
   password: {
     type: String,
     require: true,
+  },
+  accessToken: {
+    type: String,
   },
   date: {
     type: Date,

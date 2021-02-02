@@ -10,6 +10,7 @@ const path = require("path");
 //const { success, error } = require("consola");
 const userRouter = require("./routes/user");
 const profileRouter = require("./routes/profiles");
+const roleRouter = require("./routes/role");
 
 // Bring in the App constants
 //const { DB, PORT } = require("./config");
@@ -36,6 +37,7 @@ app.use(express.static(__dirname + "/public"));
 
 app.use("/api/user", userRouter);
 app.use("/api/profile", profileRouter);
+app.use("/api/role", roleRouter);
 
 const port = process.env.PORT || 5000;
 

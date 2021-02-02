@@ -7,53 +7,6 @@ const fileUpload = multer({ dest: "uploads/" });
 const fs = require("fs");
 const { send } = require("process");
 
-// Get profile image by ID
-
-router.get("/profile/:id/image", (req, res) => {
-  try {
-    const id = req.params.id;
-    Profile.findById(id).then((user) => {
-      if (!user) {
-        throw new Error("User not found");
-      } else {
-        res.set("Content-Type", "image/jpg");
-        res.send(user.profileImage);
-      }
-    });
-  } catch (error) {
-    res.status(404).json({ msg: error.message });
-  }
-});
-
-// Get profile data by ID
-
-router.get("/profile/:id", (req, res) => {
-  try {
-    const id = req.params.id;
-    Profile.findById(id).then((user) => {
-      if (!user) {
-        throw new Error("User not found");
-      } else {
-        res.set("Content-Type", "application/json");
-        res.json({
-          firstName: user.firstName,
-          lastName: user.lastName,
-          institution: user.institution,
-          experience: user.workExperience,
-          skills: user.otherSkills,
-          email: user.email,
-          stateOfOrigin: user.stateOfOrigin,
-          contactAddress: user.contactAddress,
-          phone: user.phone,
-          nextOfKin: user.nextOfKin,
-          nextOfKinAddress: user.nextOfKinAddress,
-        });
-      }
-    });
-  } catch (error) {
-    res.status(404).json({ msg: error.message });
-  }
-});
 const uploadDisk = multer({
   limits: {
     fileSize: 5000000,
@@ -109,7 +62,82 @@ router.post(
   }
 );
 
-// Edit Profile
+// Get all profiles
+router.get("/profiles", async (req, res, next) => {
+  try {
+    await Profile.find({}).then((profile) => {
+      if (!profile) req.status(404).json({ msg: "Something went wrong" });
+      res.status(200).json({ profile });
+      next();
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+// Get profile image by ID
+router.get("/profile/:id/image", (req, res) => {
+  try {
+    const id = req.params.id;
+    Profile.findById(id).then((user) => {
+      if (!user) {
+        throw new Error("User not found");
+      } else {
+        res.set("Content-Type", "image/jpg");
+        res.send(user.profileImage);
+      }
+    });
+  } catch (error) {
+    res.status(404).json({ msg: error.message });
+  }
+});
+
+// Get profile data by ID
+
+router.get("/profile/:id", (req, res) => {
+  try {
+    const id = req.params.id;
+    Profile.findById(id).then((user) => {
+      if (!user) {
+        throw new Error("User not found");
+      } else {
+        res.set("Content-Type", "application/json");
+        res.json({
+          firstName: user.firstName,
+          lastName: user.lastName,
+          institution: user.institution,
+          experience: user.workExperience,
+          skills: user.otherSkills,
+          email: user.email,
+          stateOfOrigin: user.stateOfOrigin,
+          contactAddress: user.contactAddress,
+          phone: user.phone,
+          nextOfKin: user.nextOfKin,
+          nextOfKinAddress: user.nextOfKinAddress,
+        });
+      }
+    });
+  } catch (error) {
+    res.status(404).json({ msg: error.message });
+  }
+});
+// Edit Profile or Update Profile
+router.post("/profile/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName } = req.body;
+    Profile.findByIdAndUpdate(id, {
+      firstName: firstName,
+      lastName: lastName,
+    }).then((success) => {
+      if (!success)
+        res.json({ msg: "Error updating your profile please try again " });
+      res.json({ msg: "Profile updated successfully", success });
+      next();
+    });
+  } catch (error) {
+    next(error);
+  }
+});
 
 // Delete Profile
 module.exports = router;
