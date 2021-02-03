@@ -2,6 +2,10 @@
   "name": "sms",
   "version": "1.0.0",
   "description": "Complete School management system",
+  "engines": {
+    "node": "10.15.3",
+    "npm": "6.9.0"
+  },
   "main": "server.js",
   "scripts": {
     "client-install": "npm install --prefix client",
