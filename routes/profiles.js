@@ -6,6 +6,7 @@ const helpers = require("./helpers");
 const fileUpload = multer({ dest: "uploads/" });
 const fs = require("fs");
 const { send } = require("process");
+const loggedIn = require("../middlewares/checkIfLoggedIn");
 
 const uploadDisk = multer({
   limits: {
@@ -93,7 +94,7 @@ router.get("/profile/:id/image", (req, res) => {
 
 // Get profile data by ID
 
-router.get("/profile/:id", (req, res) => {
+router.get("/profile/:id", loggedIn, (req, res) => {
   try {
     const id = req.params.id;
     Profile.findById(id).then((user) => {

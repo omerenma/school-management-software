@@ -8,6 +8,8 @@ const { body, check, validationResult } = require("express-validator");
 const { checkSchema } = require("express-validator");
 const auth = require("../middlewares/authentication");
 const validator = require("validator");
+const loggedIn = require("../middlewares/checkIfLoggedIn");
+const permission = require("../middlewares/grantAccess");
 
 // REGISTER ROUT
 router.post(
@@ -133,7 +135,7 @@ router.post("/login", async (req, res, next) => {
       bcrypt.compare(password, user.password).then((isMatch) => {
         if (!isMatch) res.status(400).json({ msg: "Incorrect password" });
         const accessToken = jwt.sign({ userId: user._id }, secret, {
-          expiresIn: "1d",
+          expiresIn: "1 day",
         });
         User.findByIdAndUpdate(user._id, { accessToken });
         res
@@ -146,38 +148,25 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-// Get all Profiles
-router.get("/profile", auth, (req, res) => {
-  const { role } = req.user;
-  console.log(role, "admin");
-  if (role !== "admin") {
-    res.status(401).json({ msg: "Access denied" });
-  }
-  User.find({}).then((user) => {
-    res.json(user);
-  });
-});
-router.get("/profile/:id", auth, (req, res) => {
-  const { id } = req.params.id;
+// GET USER BY ID
+router.get("/user/:id", loggedIn, (req, res) => {
+  const { id } = req.params;
   User.findById(id).then((user) => {
-    if (user) {
-      res.json(user);
+    if (!user) {
+      res.status(401).json({ error: "Could not fetch user" });
     } else {
-      res.status(403).json({ msg: "Unauthorized" });
+      res.status(200).json(user);
     }
   });
 });
-router.get("/dashboard/:role", (req, res) => {
-  User.findOne({ role: req.params.role }).then((user) => {
-    if (user.role == "admin") {
-      //   res.json({ msg: "Welcome to Admin Dashboard" });
-      res.redirect("/admin-dashboard");
-    }
-    if (user.role == "user") {
-      res.json({ msg: "Welcome to User Dashboard" });
-    }
-    if (user.role === undefined) {
-      res.json({ msg: "Permission denied" });
+
+router.get("/user", permission.grantAccess, (req, res) => {
+  const { id } = req.params;
+  User.findById(id).then((user) => {
+    if (!user) {
+      res.status(401).json({ error: "Could not fetch user" });
+    } else {
+      res.status(200).json(user);
     }
   });
 });
