@@ -1,5 +1,4 @@
 const role = require("./rolePermission");
-
 exports.grantAccess = function (action, resource) {
   return async (req, res, next) => {
     try {
