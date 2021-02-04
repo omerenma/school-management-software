@@ -23,11 +23,14 @@ const User = require("./models/User");
 const db = require("./config/key").mongoURI;
 try {
   mongoose
-    .connect(db, {
-      useFindAndModify: true,
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    })
+    .connect(
+      "mongodb+srv://sms:kingsly8@cluster0.leiln.mongodb.net/sms?retryWrites=true&w=majority",
+      {
+        useFindAndModify: true,
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+      }
+    )
     .then(() => console.log("DB successfully connected"));
 } catch (error) {
   console.log(error);
