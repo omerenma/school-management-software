@@ -23,18 +23,18 @@ app.use(bodyParser.json());
 // Initialize the application
 
 // Onliine db connect : mongodb://localhost:27017/schoolmanagementsystem
-const db = require("./config/key").mongoURI;
-try {
-  mongoose
-    .connect(db, {
-      useFindAndModify: true,
-      useUnifiedTopology: true,
-      useNewUrlParser: true,
-    })
-    .then(() => console.log("DB successfully connected"));
-} catch (error) {
-  console.log(error);
-}
+// const db = require("./config/key").mongoURI;
+// try {
+//   mongoose
+//     .connect(db, {
+//       useFindAndModify: true,
+//       useUnifiedTopology: true,
+//       useNewUrlParser: true,
+//     })
+//     .then(() => console.log("DB successfully connected"));
+// } catch (error) {
+//   console.log(error);
+// }
 
 // Middlewares
 //app.use(cors);
