@@ -11,6 +11,10 @@ const validator = require("validator");
 const loggedIn = require("../middlewares/checkIfLoggedIn");
 const permission = require("../middlewares/grantAccess");
 
+router.get("/", (req, res) => {
+  res.redirect("/login");
+});
+
 // REGISTER ROUT
 router.post(
   "/signup",
