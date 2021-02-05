@@ -70,7 +70,7 @@ if (process.env.NODE_ENV === "production") {
 
   app.get("*", (req, res) => {
     res.send("Hello");
-    //res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+    res.sendFile(path.resolve(__dirname, "client", "public", "index.html"));
   });
 }
 const port = process.env.PORT || 5000;
