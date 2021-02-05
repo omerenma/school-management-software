@@ -15,6 +15,9 @@ const profileRouter = require("./routes/profiles");
 const roleRouter = require("./routes/role");
 const User = require("./models/User");
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 // Bring in the App constants
 //const { DB, PORT } = require("./config");
 // Initialize the application
@@ -35,8 +38,7 @@ try {
 
 // Middlewares
 //app.use(cors);
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+
 //app.use(passport.initialize());
 //require("./middlewares/passport")(passport);
 app.use(express.static(__dirname + "/public"));
