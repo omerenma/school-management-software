@@ -23,18 +23,18 @@ app.use(bodyParser.json());
 // Initialize the application
 
 // Onliine db connect : mongodb://localhost:27017/schoolmanagementsystem
-// const db = require("./config/key").mongoURI;
-// try {
-//   mongoose
-//     .connect(db, {
-//       useFindAndModify: true,
-//       useUnifiedTopology: true,
-//       useNewUrlParser: true,
-//     })
-//     .then(() => console.log("DB successfully connected"));
-// } catch (error) {
-//   console.log(error);
-// }
+const db = require("./config/key").mongoURI;
+try {
+  mongoose
+    .connect(db, {
+      useFindAndModify: true,
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+    })
+    .then(() => console.log("DB successfully connected"));
+} catch (error) {
+  console.log(error);
+}
 
 // Middlewares
 //app.use(cors);
@@ -71,7 +71,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static("client/build"));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
+    res.sendFile(path.resolve(process.cwd(), "client", "build", "index.html"));
   });
 }
 const port = process.env.PORT || 5000;
