@@ -67,7 +67,7 @@ app.use("/api/profile", profileRouter);
 app.use("/api/role", roleRouter);
 
 // Serve static assets if in production
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV == "production") {
   // Set static folder
   app.use(express.static("app/build"));
 

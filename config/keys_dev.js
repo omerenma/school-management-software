@@ -1,4 +1,5 @@
 module.exports = {
-  mongoURI: "mongodb://localhost:27017/schoolmanagementsystem",
+  mongoURI:
+    "mongodb+srv://sms:kingsly8@cluster0.leiln.mongodb.net/sms?retryWrites=true&w=majority",
   secretOrKey: "secret",
 };
