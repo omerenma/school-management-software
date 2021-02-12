@@ -41,7 +41,7 @@ try {
 
 //app.use(passport.initialize());
 //require("./middlewares/passport")(passport);
-app.use(express.static(__dirname + "/public"));
+//app.use(express.static(__dirname + "/public"));
 
 app.use((req, res, next) => {
   if (req.headers["x-access-token"]) {
@@ -66,13 +66,13 @@ app.use("/api/user", userRouter);
 app.use("/api/profile", profileRouter);
 app.use("/api/role", roleRouter);
 
+// Serve static assets if in production
 if (process.env.NODE_ENV === "production") {
   // Set static folder
-  app.use(express.static("client/build"));
+  app.use(express.static("app/build"));
 
-  app.get("*", function (req, res) {
-    const index = path.join(__dirname, "build", "index.html");
-    res.sendFile(index);
+  app.get("*", (req, res) => {
+    res.sendFile(path.resolve(__dirname, "app", "build", "index.html"));
   });
 }
 const port = process.env.PORT || 5000;

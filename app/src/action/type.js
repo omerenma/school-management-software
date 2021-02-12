@@ -1,0 +1,21 @@
+export const LOADING = "LOADING";
+export const SUCCESS = "SUCCESS";
+export const ERROR = "ERROR";
+export const REFRESH = "REFRESH";
+
+export const LOGING_LOADING = "LOGING_LOADING";
+export const LOGING_SUCCESS = "LOGIN_SUCCESS";
+export const LOGING_ERROR = "LOGING_ERROR";
+export const LOGING_REFRESH = "LOGING_REFRESH";
+
+// Profile Action
+export const PROFILE_LOADING = "PROFILE_LOADING";
+export const PROFILE_SUCCESS = "PROFILE_SUCCESS";
+export const PROFILE_ERROR = "PROFILE_ERROR";
+export const PROFILE_REFRESH = "PROFILE_REFRESH";
+
+// Get Profile Action
+export const GET_PROFILE_LOADING = "GET_PROFILE_LOADING";
+export const GET_PROFILE_SUCCESS = "GET_PROFILE_SUCCESS";
+export const GET_PROFILE_ERROR = "GET_PROFILE_ERROR";
+export const GET_PROFILE_REFRESH = "GET_PROFILE_REFRESH";
