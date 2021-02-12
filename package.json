@@ -1,6 +1,6 @@
 {
   "name": "sms",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Complete School management system",
   "main": "server.js",
   "scripts": {
