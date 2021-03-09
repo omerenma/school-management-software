@@ -5,3 +5,14 @@
 //     pass: "kingsly8",
 //   },
 // };
+
+module.exports = {
+  authProvider: {
+    facebook: {
+      develepment: {
+        appId: 371177600347859,
+        appSecret: "pmpmqwpmfwkmelqkmmqmwednwq",
+      },
+    },
+  },
+};

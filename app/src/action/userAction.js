@@ -34,7 +34,7 @@ export const registerRequest = () => {
 export const register_action = (data) => (dispatch) => {
   dispatch(registerRequest());
   axios
-    .post("/api/user/signup/", data)
+    .post("api/user/signup/", data)
     .then((res) => {
       const { token } = res.data;
       dispatch({

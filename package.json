@@ -4,9 +4,12 @@
   "description": "Complete School management system",
   "main": "server.js",
   "scripts": {
+    "client-install": "npm install --prefix app",
     "start": "node server.js",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix app && npm run build --prefix app",
-    "server": "nodemon server.js"
+    "server": "nodemon server.js",
+    "client": "npm start --prefix app",
+    "dev": "concurrently \"npm run server\" \"npm run app\"",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm istall --prefix app && npm run build --prefix app"
   },
   "keywords": [
     "School",
@@ -22,18 +25,22 @@
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.0",
     "concurrently": "^5.3.0",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-validator": "^6.9.2",
     "gridfs-stream": "^1.1.1",
     "joi": "^17.3.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-decode": "^3.1.2",
+    "knex": "^0.21.17",
     "mongoose": "^5.11.8",
     "multer": "^1.4.2",
     "multer-gridfs-storage": "^4.2.0",
     "nodemailer": "^6.4.17",
     "passport": "^0.4.1",
+    "passport-facebook": "^3.0.0",
     "passport-jwt": "^4.0.0",
+    "pg": "^8.5.1",
     "validator": "^13.5.2"
   },
   "engines": {

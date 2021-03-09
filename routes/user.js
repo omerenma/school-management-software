@@ -10,146 +10,75 @@ const auth = require("../middlewares/authentication");
 const validator = require("validator");
 const loggedIn = require("../middlewares/checkIfLoggedIn");
 const permission = require("../middlewares/grantAccess");
+//const db = require("../config/db_connection");
+const db = require("../dbconfig").pool;
+
+// Db connection
 
 router.get("/", (req, res) => {
-  res.redirect("/login");
+  pool.query("SELECT * FROM users", (error, user) => {
+    if (error) {
+      throw error;
+    } else {
+      res.json(user.rows);
+    }
+  });
+});
+router.get("/dashboard", (req, res) => {
+  res.json("Welcome to Updated Dashboard");
 });
 
-// REGISTER ROUT
-router.post(
-  "/signup",
-  [
-    check("name", "Name too short").isLength({ min: 7 }),
-    check("name", "Name cannot be empty").notEmpty(),
-    check("email", "Must be a valid  email").isEmail(),
-    check("email", "Email cannot be empty").notEmpty(),
-    check("role", "Role cannot be empty").notEmpty(),
-    check("password", "Password must be at least 7 character long").isLength({
-      min: 7,
-    }),
-    check("password", "Password cannot be empty").notEmpty(),
-  ],
-  (req, res) => {
-    const errors = validationResult(req);
-    if (errors.isEmpty()) {
-      const { name, email, role, password } = req.body;
-      User.findOne({ email }).then((user) => {
-        if (user) {
-          res.status(400).json({ msg: "Email already exist" });
+router.post("/signup", async (req, res) => {
+  const { name, email, username, password, role_id } = req.body;
+  bcrypt.genSalt(10, (err, salt) => {
+    if (err) throw err;
+    bcrypt.hash(password, salt, (err, hash) => {
+      if (err) throw err;
+      req.body.password = hash;
+      const text =
+        "INSERT INTO users(name, email, username, password, role_id) VALUES($1, $2, $3, $4, $5)";
+      const values = [name, email, username, hash, role_id];
+      db.query(text, values, (err, result) => {
+        if (err) {
+          res.status(500).json(err);
         } else {
-          const newUser = new User({
-            name,
-            email,
-            role: role || "admin",
-            password,
-          });
-          bcrypt.genSalt(10, (err, salt) => {
+          res.json(result);
+        }
+      });
+    });
+  });
+});
+
+// Login route
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  const { rows } = await db.query("SELECT * FROM users WHERE email = $1", [
+    email,
+  ]);
+  rows.map((data) => {
+    if (data.email == email) {
+      bcrypt.compare(password, data.password).then((isMatch) => {
+        if (!isMatch) {
+          res.status(400).json({ message: "Email not found" });
+        } else {
+          const payload = {
+            role: data.role_id,
+            name: data.name,
+            email: data.email,
+          };
+          jwt.sign(payload, secret, { expiresIn: "1 day" }, (err, token) => {
             if (err) throw err;
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-              if (err) throw err;
-              newUser.password = hash;
-              const accessToken = jwt.sign({ userId: newUser._id }, secret, {
-                expiresIn: "1d",
-              });
-              newUser.accessToken = accessToken;
-              newUser.save();
-              res.json({
-                data: newUser,
-                accessToken,
-              });
+            res.status(200).json({
+              success: true,
+              token: `Bearer ${token}`,
             });
           });
         }
       });
-      // .catch((err) => {
-      //   res.json({ msg: err });
-      // });
-    } else if (!errors.isEmpty()) {
-      return res.status(400).json(
-        errors.array().map((err) => {
-          return err.msg;
-        })
-      );
+    } else {
+      res.json("Wrong email");
     }
-  }
-);
-
-// LOGIN ROUTE
-// router.post(
-//   "/login",
-//   [
-//     check("email", "Must be a valid  email").isEmail(),
-//     check("email", "Email cannot be empty").notEmpty(),
-//     check("password", "Password must be at least 7 character long").isLength({
-//       min: 7,
-//     }),
-//     check("password", "Password cannot be empty").notEmpty(),
-//   ],
-//   (req, res) => {
-//     const errors = validationResult(req);
-//     if (errors.isEmpty()) {
-//       const { email, password } = req.body;
-//       User.findOne({ email }).then((user) => {
-//         if (!user) {
-//           res.status(400).json({ msg: "Email does not exist" });
-//         } else {
-//           bcrypt.compare(password, user.password).then((isMatch) => {
-//             if (isMatch) {
-//               const payload = {
-//                 id: user._id,
-//                 // name: user.name,
-//                 // email: user.email,
-//                 // role: user.role,
-//               };
-//               jwt.sign(
-//                 payload,
-//                 secret,
-//                 { expiresIn: "1 day" },
-//                 (err, token) => {
-//                   if (err) throw err;
-//                   res.status(200).json({
-//                     success: true,
-//                     token: `Bearer ${token}`,
-//                   });
-//                 }
-//               );
-//             } else {
-//               res.status(400).json({ msg: "Incorrect password" });
-//             }
-//           });
-//         }
-//       });
-//     } else if (!errors.isEmpty()) {
-//       return res.status(400).json(
-//         errors.array().map((err) => {
-//           return err.msg;
-//         })
-//       );
-//     }
-//     {
-//     }
-//   }
-// );
-
-router.post("/login", async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
-    await User.findOne({ email }).then((user) => {
-      if (!user) res.status(400).json({ msg: "Email not found" });
-      bcrypt.compare(password, user.password).then((isMatch) => {
-        if (!isMatch) res.status(400).json({ msg: "Incorrect password" });
-        const accessToken = jwt.sign({ userId: user._id }, secret, {
-          expiresIn: "1 day",
-        });
-        User.findByIdAndUpdate(user._id, { accessToken });
-        res
-          .status(200)
-          .json({ email: user.email, role: user.role, accessToken });
-      });
-    });
-  } catch (error) {
-    next(error);
-  }
+  });
 });
 
 // GET USER BY ID

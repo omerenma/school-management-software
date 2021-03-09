@@ -1,7 +1,31 @@
-.landing-page {
-  color: red;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
-.admin-dasheader {
-  margin: auto;
-  color: blue;
+html {
+  font-size: 16px;
+}
+
+.container {
+  margin: 0 auto;
+  background-color: rgb(231, 225, 225);
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 300px;
+  grid-gap: 20px;
+}
+.email {
+  grid-column: 1 / -1;
+}
+.password {
+  grid-column: 2 / -1;
+}
+.login,
+.signup {
+  /* background: url(./images/school2.jpg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover; */
 }

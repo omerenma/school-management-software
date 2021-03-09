@@ -16,6 +16,7 @@ import {
   Dimmer,
   Message,
 } from "semantic-ui-react";
+import "../../Apps.css";
 
 class Signup extends Component {
   constructor(props) {
@@ -54,7 +55,7 @@ class Signup extends Component {
   render() {
     const { loading, success, error } = this.props;
     return (
-      <div>
+      <div className="signup">
         {/* {success == true ? this.props.history.push("/dashboard") : ""} */}
         {success == true ? (
           <Snackbar

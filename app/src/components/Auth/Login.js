@@ -11,6 +11,7 @@ import {
   Message,
   Segment,
 } from "semantic-ui-react";
+import "../../Apps.css";
 
 export class Login extends Component {
   constructor(props) {
@@ -43,7 +44,6 @@ export class Login extends Component {
 
     return (
       <div>
-        {/* {success == true ? this.props.history.push("/dashboard") : ""} */}
         <Grid
           textAlign="center"
           style={{ height: "100vh" }}
