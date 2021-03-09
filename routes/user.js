@@ -71,6 +71,7 @@ router.post("/login", async (req, res) => {
             res.status(200).json({
               success: true,
               token: `Bearer ${token}`,
+              data: payload,
             });
           });
         }
