@@ -14,7 +14,7 @@ import { persistStore } from "redux-persist";
 import store from "./store";
 import Signup from "./components/Auth/Signup";
 import Login from "./components/Auth/Login";
-import DashBoard from "./components/Dashboard/Dashboard";
+import Dashboard from "./components/Dashboard/Dashboard";
 import NotFound from "./components/404";
 import Landing from "./components/Landing/Landing";
 import { Loader, Dimmer } from "semantic-ui-react";
@@ -29,7 +29,7 @@ function App() {
           <Switch>
             <Route exact path="/" component={Login} />
             <Route path="/signup" component={Signup} />
-            <Route path="/dashboard" component={DashBoard} />
+            <Route path="/dashboard" component={Dashboard} />
             <Route component={NotFound} />
           </Switch>
         </Router>

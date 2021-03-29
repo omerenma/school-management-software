@@ -34,12 +34,12 @@ export const registerRequest = () => {
 export const register_action = (data) => (dispatch) => {
   dispatch(registerRequest());
   axios
-    .post("api/user/signup/", data)
+    .post("http://localhost:5000/api/user/signup/", data)
     .then((res) => {
-      const { token } = res.data;
+      // const { token } = res.data;
       dispatch({
         type: SUCCESS,
-        payload: res.data.statusText,
+        payload: res.data,
       });
     })
     .catch((err) =>
@@ -53,16 +53,14 @@ export const register_action = (data) => (dispatch) => {
 export const login_action = (data) => (dispatch) => {
   dispatch(loadingRequest());
   axios
-    .post("api/user/login", data)
+    .post("http://localhost:5000/api/user/login", data)
     .then((res) => {
-      const token = res.data.token;
-      const decoded = decode(token);
-      console.log(decoded, "decoded token");
-      console.log(token, "tokkken");
+      //const token = res.data.token;
+      //const decoded = decode(token);
       dispatch({
         type: LOGING_SUCCESS,
         payload: res.data,
-        tokenDecoded: decoded,
+        //tokenDecoded: res.data,
       });
     })
     .catch((err) =>

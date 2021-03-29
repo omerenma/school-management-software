@@ -22,18 +22,14 @@ export class Login extends Component {
     };
   }
   HandleSubmit = (e) => {
-    const { success } = this.props;
+    const { success, history } = this.props;
     e.preventDefault();
     const data = {
       email: this.state.email,
       password: this.state.password,
     };
     this.props.login_action(data);
-    if (success == true) {
-      console.log("Yes");
-    } else {
-      return;
-    }
+    history.push("/dashboard");
   };
   HandleChange = (e) => {
     this.setState({ [e.target.name]: e.target.value });
@@ -97,35 +93,6 @@ export class Login extends Component {
           </Grid.Column>
         </Grid>
       </div>
-      // <div style={styles.root}>
-      //   {success == true ? this.props.history.push("/dashboard") : ""}
-
-      //   <div style={styles.form}>
-      //     <form onSubmit={this.HandleSubmit}>
-      //       <div>
-      //         <label>Email</label>
-      //         <input
-      //           type="text"
-      //           name="email"
-      //           value={this.state.email}
-      //           onChange={this.HandleChange}
-      //         />
-      //       </div>
-      //       <div>
-      //         <label>Password</label>
-      //         <input
-      //           type="password"
-      //           name="password"
-      //           value={this.state.password}
-      //           onChange={this.HandleChange}
-      //         />
-      //       </div>
-      //       <div>
-      //         <input type="submit" value="Submit" />
-      //       </div>
-      //     </form>
-      //   </div>
-      // </div>
     );
   }
 }

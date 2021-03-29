@@ -24,7 +24,8 @@ class Signup extends Component {
     this.state = {
       name: "",
       email: "",
-      role: "",
+      username: "",
+      role_id: "",
       password: "",
     };
   }
@@ -33,9 +34,9 @@ class Signup extends Component {
     const data = {
       name: this.state.name,
       email: this.state.email,
-      role: this.state.role,
+      username: this.state.username,
+      role_id: this.state.role_id,
       password: this.state.password,
-      open: false,
     };
     this.props.register_action(data);
   };
@@ -122,12 +123,12 @@ class Signup extends Component {
                 />
                 <Form.Input
                   fluid
-                  icon="lock"
+                  icon="user"
                   iconPosition="left"
-                  placeholder="Role"
+                  placeholder="Username"
                   type="text"
-                  name="role"
-                  value={this.state.role}
+                  name="username"
+                  value={this.state.username}
                   onChange={this.HandleChange}
                 />
                 <Form.Input
@@ -138,6 +139,16 @@ class Signup extends Component {
                   type="password"
                   name="password"
                   value={this.state.password}
+                  onChange={this.HandleChange}
+                />
+                <Form.Input
+                  fluid
+                  icon="lock"
+                  iconPosition="left"
+                  placeholder="Role"
+                  type="text"
+                  name="role_id"
+                  value={this.state.role_id}
                   onChange={this.HandleChange}
                 />
 

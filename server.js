@@ -1,11 +1,15 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 // Configur JSON parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// cors restricted to only path that starts
+// with /api
+app.use("/api", cors());
 const homeRouter = require("./routes/home");
 const userRouter = require("./routes/user");
 const profileRouter = require("./routes/profiles");
@@ -14,7 +18,7 @@ const roleRouter = require("./routes/role");
 app.use(express.static(__filename, +"./index.html"));
 // Configur Route paths
 app.use("/api/home", homeRouter);
-app.use("/api/user", userRouter);
+app.use("/api/users", userRouter);
 app.use("/api/profile", profileRouter);
 app.use("/api/role", roleRouter);
 
