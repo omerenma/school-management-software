@@ -45,6 +45,7 @@ router.post("/login", async (req, res) => {
   const { rows } = await db.query("SELECT * FROM users WHERE email = $1", [
     email,
   ]);
+  const pages = await db.query("SELECT * FROM pages");
   rows.map((data) => {
     if (data.email == email) {
       bcrypt.compare(password, data.password).then((isMatch) => {
@@ -58,17 +59,18 @@ router.post("/login", async (req, res) => {
           };
 
           const access_token = jwt.sign(payload, secret, {
-            expiresIn: "1d",
+            expiresIn: "120s",
           });
           const refresh_token = jwt.sign(payload, refreshTokenSecret, {
-            expiresIn: "1d",
+            expiresIn: "1 day",
           });
 
           refreshTokens.push(refresh_token);
 
           res.json({
-            access_token: `Bearer ${access_token}`,
+            access_token: `${access_token}`,
             refresh_token: `${refresh_token}`,
+            role: data.role_id,
           });
         }
       });
@@ -96,17 +98,21 @@ router.get("/dashboard", authenticate, (req, res) => {
 // Token route
 router.post("/token", (req, res) => {
   const { refresh_token } = req.body;
-  if (!refresh_token) {
-    res.json(401).json({ msg: "No refresh token found" });
+  if (!refresh_token || !refreshTokens.includes(refresh_token)) {
+    res.json(401).json({ msg: "Not authenticated" });
   }
   jwt.verify(refresh_token, refreshTokenSecret, (err, payload) => {
     if (err) {
-      console.log("token error", err);
+      return res.status(403).json({ message: "User not authenticated" });
     } else {
-      const access_token = jwt.sign(payload, secret);
-      refreshTokens.pop();
-      refreshTokens.push(access_token);
-      res.json({ access_token: access_token });
+      const access_token = jwt.sign(
+        { name: payload.name, email: payload.email, role: payload.role },
+        secret,
+        {
+          expiresIn: "1 minute",
+        }
+      );
+      return res.status(201).json({ access_token });
     }
   });
 });
@@ -114,7 +120,9 @@ router.post("/token", (req, res) => {
 // Logout route
 router.post("/logout", (req, res) => {
   refreshTokens.pop();
-  res.redirect("/api/user/login");
+  res.json({
+    msg: "Logged out!",
+  });
 });
 
 module.exports = router;

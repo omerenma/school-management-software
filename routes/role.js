@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const Role = require("../models/Role");
 
 // Get role
 router.get("/role", (req, res) => {
@@ -9,8 +8,8 @@ router.get("/role", (req, res) => {
 // Add role
 
 router.post("/role", (req, res) => {
-  const { role } = req.body;
-  console.log(role);
+  const { name, id } = req.body;
+  res.json({ name, id });
 });
 
 // Edit role

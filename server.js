@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 
 // cors restricted to only path that starts
 // with /api
-app.use("/api", cors());
+app.use(cors());
 const homeRouter = require("./routes/home");
 const userRouter = require("./routes/user");
 const profileRouter = require("./routes/profiles");
@@ -31,7 +31,6 @@ app.use((req, res, next) => {
 
 // Custom Unauthenticated page
 app.use((req, res, next) => {
-  res.type("text/plain");
   res.status(406).json("Unauthorized");
   next();
 });
